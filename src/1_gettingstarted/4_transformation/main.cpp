@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <stb_image.h>
 #include <iostream>
 #include <fstream>
@@ -155,9 +158,9 @@ int main()
 
     //load glsl programs
     char* vertexShaderSource =
-        openGLSLProgram("../src/1_gettingstarted/3_texture/shaders/shader.vert");
+        openGLSLProgram("../src/1_gettingstarted/4_transformation/shaders/shader.vert");
     char* fragmentShaderSource =
-        openGLSLProgram("../src/1_gettingstarted/3_texture/shaders/shader.frag");
+        openGLSLProgram("../src/1_gettingstarted/4_transformation/shaders/shader.frag");
 
     //compile glsl program
     unsigned int vertexShader;
@@ -195,7 +198,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
+
+        glm::mat4 trans = glm::rotate(glm::identity<glm::mat4>(), (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
         glBindVertexArray(0);
         glUseProgram(0);
 

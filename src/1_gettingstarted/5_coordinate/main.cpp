@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <stb_image.h>
 #include <iostream>
 #include <fstream>
@@ -9,9 +12,14 @@ using namespace std;
 
 char infoLog[2048];
 
+int screenWidth = 800;
+int screenHeight = 600;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    screenWidth = width;
+    screenHeight = height;
 }
 
 void processInput(GLFWwindow* window)
@@ -117,16 +125,59 @@ int main()
 
     //-------data--------
     float vertices[] = {
-        //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
-             0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
-             0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
-            -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
-            -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
+        //     ---- 位置 ----      - 纹理坐标 -
+             0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+             0.5f, -0.5f, -0.5f,   1.0f, 1.0f,
+             0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,   0.0f, 1.0f
     };
 
-    unsigned int indices[] = { // 注意索引从0开始! 
-        0, 1, 3, // 第一个三角形
-        1, 2, 3  // 第二个三角形
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3,
+        4, 5, 7,
+        5, 6, 7,
+        8, 9, 11,
+        9, 10, 11,
+        12, 13, 15,
+        13, 14, 15,
+        16, 17, 19,
+        17, 18, 19,
+        20, 21, 23,
+        21, 22, 23,
+    };
+
+    glm::vec3 positions[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
     //creat vert buffer
@@ -137,9 +188,8 @@ int main()
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
@@ -155,9 +205,9 @@ int main()
 
     //load glsl programs
     char* vertexShaderSource =
-        openGLSLProgram("../src/1_gettingstarted/3_texture/shaders/shader.vert");
+        openGLSLProgram("../src/1_gettingstarted/5_coordinate/shaders/shader.vert");
     char* fragmentShaderSource =
-        openGLSLProgram("../src/1_gettingstarted/3_texture/shaders/shader.frag");
+        openGLSLProgram("../src/1_gettingstarted/5_coordinate/shaders/shader.frag");
 
     //compile glsl program
     unsigned int vertexShader;
@@ -187,15 +237,31 @@ int main()
     glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 1);
     glUseProgram(0);
 
+    glEnable(GL_DEPTH_TEST);
+
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+        glm::mat4 view = glm::translate(glm::identity<glm::mat4>(), glm::vec3(0.0f, 0.0f, -3.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth / screenHeight, 0.1f, 100.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        for (int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::rotate(
+                glm::translate(glm::identity<glm::mat4>(), positions[i]),
+                (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, NULL);
+        }
+
         glBindVertexArray(0);
         glUseProgram(0);
 

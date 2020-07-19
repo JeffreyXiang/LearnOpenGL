@@ -117,9 +117,9 @@ int main()
 
     //load glsl programs
     char* vertexShaderSource =
-        openGLSLProgram("../src/1_gettingstarted/2_triangle/shaders/triangle.vert");
+        openGLSLProgram("../src/1_gettingstarted/2_triangle/shaders/shader.vert");
     char* fragmentShaderSource =
-        openGLSLProgram("../src/1_gettingstarted/2_triangle/shaders/triangle.frag");
+        openGLSLProgram("../src/1_gettingstarted/2_triangle/shaders/shader.frag");
 
     //compile glsl program
     unsigned int vertexShader;
