@@ -1,1 +1,1 @@
-Xi_addTarget(MODE LIB)
+Xi_addTarget(MODE STATIC)
